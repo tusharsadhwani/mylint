@@ -9,6 +9,12 @@ original version of this, that was used in the article.
 [1]: https://sadh.life/post/ast
 [2]: https://github.com/tusharsadhwani/mylint/tree/original
 
+## Installation
+
+```console
+pip install mylint
+```
+
 ## Usage
 
 ```console
