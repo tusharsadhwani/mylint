@@ -131,8 +131,8 @@ class UnusedVariableChecker(Checker):
         super().generic_visit(node)
 
 
-def main():
-    source_paths = sys.argv[1:]
+def cli(argv=sys.argv):
+    source_paths = argv[1:]
 
     linter = Linter()
     linter.checkers.add(SetDuplicateItemChecker(issue_code="W001"))
@@ -140,7 +140,3 @@ def main():
 
     for source_path in source_paths:
         linter.run(source_path)
-
-
-if __name__ == "__main__":
-    main()
