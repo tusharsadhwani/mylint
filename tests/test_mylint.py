@@ -13,10 +13,10 @@ def test_mylint(capsys: CaptureFixture[str]) -> None:
 
     assert sorted(stdout.splitlines()) == sorted(
         [
-            "testcode.py:1:0: W002: Unused variable: 's'",
-            "testcode.py:5:4: W002: Unused variable: 'var'",
-            "testcode.py:17:0: W002: Unused variable: 's2'",
-            "testcode.py:12:12: W001: Set contains duplicate item: 'PUT'",
-            "testcode.py:17:15: W001: Set contains duplicate item: 1",
+            "testcode.py:3:0: W002: Unused variable: 's'",
+            "testcode.py:8:4: W002: Unused variable: 'var'",
+            "testcode.py:21:0: W002: Unused variable: 's2'",
+            "testcode.py:15:12: W001: Set contains duplicate item: 'PUT'",
+            "testcode.py:21:15: W001: Set contains duplicate item: 1",
         ]
     )

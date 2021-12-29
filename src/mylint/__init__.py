@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import ast
 import os
 import sys
-from typing import NamedTuple
+from typing import NamedTuple, Sequence
 
 
 class Violation(NamedTuple):
@@ -20,26 +22,27 @@ class Checker(ast.NodeVisitor):
     nodes that violate that lint rule.
     """
 
-    def __init__(self, issue_code):
+    def __init__(self, issue_code: str) -> None:
         self.issue_code = issue_code
-        self.violations = set()
+        self.violations: set[Violation] = set()
 
 
 class Linter:
     """Holds all list rules, and runs them against a source file."""
 
-    def __init__(self):
-        self.checkers = set()
+    def __init__(self) -> None:
+        self.checkers: set[Checker] = set()
 
     @staticmethod
-    def print_violations(checker, file_name):
+    def print_violations(checker: Checker, file_name: str) -> None:
+        """Prints all violations collected by a checker."""
         for node, message in checker.violations:
             print(
                 f"{file_name}:{node.lineno}:{node.col_offset}: "
                 f"{checker.issue_code}: {message}"
             )
 
-    def run(self, source_path):
+    def run(self, source_path: str) -> None:
         """Runs all lints on a source file."""
         file_name = os.path.basename(source_path)
 
@@ -55,7 +58,7 @@ class Linter:
 class SetDuplicateItemChecker(Checker):
     """Checks if a set in your code has duplicate constants."""
 
-    def visit_Set(self, node):
+    def visit_Set(self, node: ast.Set) -> None:
         """Stores all the constants this set holds, and finds duplicates"""
         seen_values = set()
         for element in node.elts:
@@ -79,17 +82,17 @@ class SetDuplicateItemChecker(Checker):
 class UnusedVariableInScopeChecker(Checker):
     """Checks if any variables are unused in this node's scope."""
 
-    def __init__(self, issue_code):
+    def __init__(self, issue_code: str) -> None:
         super().__init__(issue_code)
         # unused_names is a dictionary that stores variable names, and
         # whether or not they've been found in a "Load" context yet.
         # If it's found to be used, its value is turned to False.
-        self.unused_names = {}
+        self.unused_names: dict[str, bool] = {}
 
         # name_nodes holds the first occurences of variables.
-        self.name_nodes = {}
+        self.name_nodes: dict[str, ast.Name] = {}
 
-    def visit_Name(self, node):
+    def visit_Name(self, node: ast.Name) -> None:
         """Find all nodes that only exist in `Store` context"""
         var_name = node.id
 
@@ -108,7 +111,7 @@ class UnusedVariableInScopeChecker(Checker):
 
 
 class UnusedVariableChecker(Checker):
-    def check_for_unused_variables(self, node):
+    def check_for_unused_variables(self, node: ast.AST) -> None:
         """Find unused variables in the local scope of this node."""
         visitor = UnusedVariableInScopeChecker(self.issue_code)
         visitor.visit(node)
@@ -118,20 +121,20 @@ class UnusedVariableChecker(Checker):
                 node = visitor.name_nodes[name]
                 self.violations.add(Violation(node, f"Unused variable: {name!r}"))
 
-    def visit_Module(self, node):
+    def visit_Module(self, node: ast.Module) -> None:
         self.check_for_unused_variables(node)
         super().generic_visit(node)
 
-    def visit_ClassDef(self, node):
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self.check_for_unused_variables(node)
         super().generic_visit(node)
 
-    def visit_FunctionDef(self, node):
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         self.check_for_unused_variables(node)
         super().generic_visit(node)
 
 
-def cli(argv=sys.argv):
+def cli(argv: Sequence[str] = sys.argv) -> None:
     source_paths = argv[1:]
 
     linter = Linter()
